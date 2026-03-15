@@ -5,6 +5,15 @@
 # EventPlatform
 --------------------------------
 
+EventsPlatform: 3 modules
+
+User Authentication & Authorization Module: 
+Secure login/registration for administrators, organizers, and attendees, with role-based access control. 
+Event Creation & Management Module: 
+Enables organizers to input event details (date, venue, description), create agendas, and manage speaker information. 
+Registration & Ticketing Module: 
+Allows participants to sign up, select ticket types, and process payments securely.
+
 mkdir EventPlatform
 cd EventPlatform
 
