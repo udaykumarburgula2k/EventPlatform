@@ -95,8 +95,11 @@ public class EventsController : ControllerBase
         return Ok(response);
     }
 
+
+    // [Authorize(Roles = $"{Roles.Administrator},{Roles.Organizer}")]
+
     [HttpPost]
-    [Authorize(Roles = $"{Roles.Administrator},{Roles.Organizer}")]
+    [Authorize(Policy = Policies.ManageEvents)]
     public async Task<IActionResult> Create(CreateEventRequest request)
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)

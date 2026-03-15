@@ -1,10 +1,11 @@
-﻿using System.Security.Claims;
-using EventPlatform.Api.Common;
+﻿using EventPlatform.Api.Common;
 using EventPlatform.Api.Data;
 using EventPlatform.Api.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using System.Security.Claims;
 
 namespace EventPlatform.Api.Modules.Registration;
 
@@ -15,16 +16,21 @@ public class RegistrationsController : ControllerBase
     private readonly AppDbContext _db;
     private readonly IPaymentService _paymentService;
 
-    public RegistrationsController(AppDbContext db, IPaymentService paymentService)
+    private readonly RegistrationModuleOptions _options;
+    public RegistrationsController(AppDbContext db, IPaymentService paymentService, IOptions<RegistrationModuleOptions> options)
     {
         _db = db;
         _paymentService = paymentService;
+        _options = options.Value;
     }
 
     [HttpPost]
     [Authorize(Roles = $"{Roles.Administrator},{Roles.Attendee}")]
     public async Task<IActionResult> Register(RegisterForEventRequest request)
     {
+        if (!_options.Enabled)
+            return BadRequest("Registration module is disabled.");
+
         var userIdClaim =
             User.FindFirstValue(ClaimTypes.NameIdentifier) ??
             User.FindFirstValue("sub");

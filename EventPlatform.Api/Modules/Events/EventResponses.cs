@@ -28,3 +28,11 @@ public record EventResponse(
     List<AgendaItemResponse> AgendaItems,
     List<SpeakerResponse> Speakers,
     List<TicketTypeResponse> TicketTypes);
+
+
+public class EventAccess
+{
+    public Guid EventId { get; set; }
+    public Guid UserId { get; set; }
+    public string Permission { get; set; } = "View";
+}

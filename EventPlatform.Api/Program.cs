@@ -1,12 +1,17 @@
-using System.Text;
+using EventPlatform.Api.Common;
 using EventPlatform.Api.Data;
 using EventPlatform.Api.Infrastructure;
 using EventPlatform.Api.Modules.Auth;
+using EventPlatform.Api.Modules.Events;
+using EventPlatform.Api.Modules.Events.Authorization;
+using EventPlatform.Api.Modules.Registration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +20,35 @@ builder.Services.Configure<JwtOptions>(
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.Configure<AuthModuleOptions>(
+    builder.Configuration.GetSection(AuthModuleOptions.SectionName));
+
+builder.Services.Configure<EventModuleOptions>(
+    builder.Configuration.GetSection(EventModuleOptions.SectionName));
+
+builder.Services.Configure<RegistrationModuleOptions>(
+    builder.Configuration.GetSection(RegistrationModuleOptions.SectionName));
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(Policies.AdminOnly, policy =>
+        policy.RequireRole(Roles.Administrator));
+
+    options.AddPolicy(Policies.ManageEvents, policy =>
+        policy.RequireRole(Roles.Administrator, Roles.Organizer));
+
+    options.AddPolicy(Policies.RegisterForEvent, policy =>
+        policy.RequireRole(Roles.Administrator, Roles.Attendee));
+});
+
+builder.Services.AddScoped<IAuthorizationHandler, CanEditEventHandler>();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("CanEditEvent", policy =>
+        policy.Requirements.Add(new CanEditEventRequirement()));
+});
 
 builder.Services
     .AddIdentityCore<ApplicationUser>(options =>
